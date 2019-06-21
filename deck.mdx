@@ -1,0 +1,1135 @@
+import { Appear, Notes } from 'mdx-deck'
+import { CodeSurfer } from "mdx-deck-code-surfer"
+export { components } from "mdx-deck-code-surfer"
+export { future as theme } from 'mdx-deck/themes'
+
+
+# PADRÕES DE COMPONENTES<br/>REACT
+
+---
+
+# Pauta
+<ul>
+  <Appear>
+    <li>7 padrões e conceitos básicos</li>
+    <li>O que são Reusable Components</li>
+    <li>5 padrões avançados</li>
+    <li>As diferenças e uso recomendado destes padrões</li>
+  </Appear>
+</ul>
+
+---
+
+# Padrões e conceitos básicos
+<ul>
+  <Appear>
+    <li>Function component</li>
+    <li>Destructuring props</li>
+    <li>Spread attributes</li>
+    <li>Merge destructured props</li>
+    <li>Children types</li>
+    <li>Children Array</li>
+    <li>Class Component</li>
+  </Appear>
+</ul>
+
+---
+
+```jsx
+function Greeting() {
+  return <div>Hi there!</div>;
+}
+```
+
+<Notes>Simplest way to declare reusable components.
+They're just functions</Notes>
+
+---
+
+```jsx
+function Greeting(props) {
+  return <div>Hi {props.name}!</div>;
+}
+----
+* > ↓
+1[4] > ↓
+2[8:10]
+```
+
+<Notes>Collect props from the first argument of your function.</Notes>
+
+---
+
+```jsx
+function Greeting(props) {
+  let style = {
+    fontWeight: "bold",
+    color: context.color
+  };
+
+  return <div style={style}>Hi {props.name}!</div>;
+}
+----
+* > ↓
+2:5 > ↓
+7
+```
+
+<Notes>
+  <p>Define any number of local variables to do what you need in your function components.</p>
+  Always return your React Component at the end.
+</Notes>
+
+---
+
+```jsx
+function Greeting(props) {
+  return <div>Hi {props.name}!</div>;
+}
+
+Greeting.defaultProps = {
+  name: "Guest"
+};
+----
+* > ↓
+5:7
+```
+
+<Notes>
+  <p>Set defaults for any required props using defaultProps</p>
+  END 🛑 Function Component
+</Notes>
+
+---
+
+```jsx
+let person = { name: "my name" };
+let { name } = person;
+
+
+let things = ["one", "two"];
+let [first, second] = things;
+```
+
+<Notes>
+  <p>Destructuring assignment is a JavaScript feature.</p>
+  Think of it like the opposite of literal assignment.
+</Notes>
+
+---
+
+```jsx
+function Greeting(props) {
+  return <div>Hi {props.name}!</div>;
+}
+
+
+function Greeting({ name }) {
+  return <div>Hi {name}!</div>;
+}
+----
+* > ↓
+1[4], 2[8:10], 6[5:7], 7[8]
+```
+
+<Notes>
+  <p>Destructuring assignment is used a lot in function components.</p>
+  These component declarations below are equivalent.
+</Notes>
+
+---
+
+```jsx
+function Greeting({ name, ...restProps }) {
+  return <div>Hi {name}!</div>;
+}
+----
+* > ↓
+1[8] > ↓
+1[9] > ↓
+1[8:9]
+```
+
+<Notes>
+  <p>Those three dots (...) take all the remaining properties and assign them to the object restProps.</p>
+  END 🛑 Destructuring props
+</Notes>
+
+---
+
+```jsx
+function Greeting({ name, ...restProps }) {
+  return <div {...restProps}>Hi {name}!</div>;
+}
+
+<Greeting
+  name="Fancy pants"
+  className="fancy-greeting"
+  id="user-greeting"
+/>
+----
+* > ↓
+7, 8 > ↓
+1[8:9] > ↓
+1[8:9], 2[7:8]
+```
+
+<Notes>
+  <p>We can spread restProps over our div</p>
+  END 🛑 JSX spread attributes
+</Notes>
+
+---
+
+```jsx
+function MyButton(props) {
+  return <button className="btn" {...props} />;
+}
+
+function MyButton(props) {
+  return <button {...props} className="btn" />;
+}
+
+<MyButton className="delete-btn">Delete...</MyButton>
+----
+9 > ↓
+9[4:8] > ↓
+1:3 > ↓
+5:7
+```
+
+<Notes>
+  <p>Components are abstractions.</p>
+  <p>Good abstractions allow for extension.</p>
+  <p>Consider this component that uses a class attribute for style a button</p>
+  <p>This works great until we try to extend it with another class.</p>
+  <p>In this case, delete-btn replaces btn. Order matters for JSX spread attributes. The props.className being spread is overriding the className in our component. will never be anything but btn</p>
+</Notes>
+
+---
+
+```jsx
+function MyButton({ className, ...props }) {
+  let classNames = ["btn", className].join(" ");
+
+  return <button className={classNames} {...props} />;
+}
+----
+* > ↓
+1[4,5,10] > ↓
+2 > ↓
+4[8:10]
+```
+
+<Notes>
+  We need to use destructuring assignment to get the incoming className and merge with the base className.
+</Notes>
+
+---
+
+```jsx
+function MyButton({ className = "", ...props }) {
+  let classNames = ["btn", className].join(" ");
+
+  return <button className={classNames} {...props} />;
+}
+----
+* > ↓
+1[5:8]
+```
+
+<Notes>
+  <p>To guard from undefined showing up as a className. Use default values.</p>
+  END 🛑 Merge destructured props with other values
+</Notes>
+
+---
+
+```jsx
+<div>Hello World!</div>
+
+<div>{["Hello ", <span>World</span>, "!"]}</div>
+```
+
+<Notes>
+  <p>React can render children from most types. In most cases it's either an array or a string</p>
+  END 🛑 Children Types
+</Notes>
+
+---
+
+```jsx
+<ul>
+  {["first", "second"].map(item => (
+    <li>{item}</li>
+  ))}
+</ul>
+
+
+<ul>{[<li>first</li>, <li>second</li>]}</ul>
+```
+
+<Notes>
+  <p>Providing an array as children is a very common. It's how lists are drawn in React.</p>
+  <p>We use map() to create an array of React Elements for every value in the array. That's equivalent to providing a literal array.</p>
+</Notes>
+
+---
+
+```jsx
+<ul>
+  {arrayOfMessageObjects.map(({ id, ...message }) => (
+    <Message key={id} {...message} />
+  ))}
+</ul>
+----
+* > ↓
+2[7:13] > ↓
+3[10:13] > ↓
+2[2:4], 3[1,2,15]
+```
+
+<Notes>
+  <p>This pattern can be combined with destructuring, JSX Spread Attributes, and other components, for some serious terseness.</p>
+  END 🛑 Array as children
+</Notes>
+
+---
+
+```jsx
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      value: '',
+    };
+  }
+
+  onChange = event => {
+    this.setState({ value: event.target.value });
+  };
+
+  render() {
+    return (
+      <div>
+        <h1>Hello React ES6 Class Component!</h1>
+
+        <input
+          value={this.state.value}
+          type="text"
+          onChange={this.onChange}
+        />
+
+        <p>{this.state.value}</p>
+      </div>
+    );
+  }
+}
+----
+* > ↓
+2:8 > ↓
+5:7 > ↓
+14:28
+```
+
+<Notes>
+  <p>React Class Components were introduced with JavaScript ES6, because JS classes were made available to the language.</p>
+  <p>methods like the class constructor – which is primarily used in React to set initial state or to bind methods – and the mandatory render method to return JSX as output.</p>
+  <p>All the internal React Component logic comes from the extends React.Component via object-oriented inheritance that is used in the class component.</p>
+
+</Notes>
+
+---
+
+```jsx
+class App extends React.Component {
+  state = {
+    value: localStorage.getItem('myValueInLocalStorage') || '',
+  };
+
+  componentDidUpdate() {
+    localStorage.setItem('myValueInLocalStorage', this.state.value);
+  }
+
+  onChange = event => {
+    this.setState({ value: event.target.value });
+  };
+
+  render() {
+    return (
+      <div>
+        <h1>Hello React ES6 Class Component!</h1>
+
+        <input
+          value={this.state.value}
+          type="text"
+          onChange={this.onChange}
+        />
+
+        <p>{this.state.value}</p>
+      </div>
+    );
+  }
+}
+----
+* > ↓
+2:4 > ↓
+14:28 > ↓
+10:12 > ↓
+11 > ↓
+6:8
+```
+
+<Notes>
+  <p>By using this.state, this.setState(), and lifecycle methods, state management and side-effects can be used side by side in a React class component.</p>
+  END 🛑 Class Component
+</Notes>
+
+---
+
+<CodeSurfer
+  title="Reusable component"
+  code={require("!raw-loader!./examples/reusable-components/01.js").default}
+/>
+
+<Notes>
+  <p>we make a component more reusable by turning it from specific to more generic.</p>
+  <p>That can be achieved by offering an API for the component. In React, a component’s API is its props.</p>
+  <p>refactoring a component from being very specific to being more generic</p>
+  <p> we don’t have any components except for our root component commonly called App</p>
+</Notes>
+
+---
+
+<CodeSurfer
+  code={require("!raw-loader!./examples/reusable-components/02.js").default}
+  steps={[
+    { notes: '' },
+    { lines: [6], range: [11, 19] }
+  ]}
+/>
+
+<Notes>
+  <p>However, even though the component is reusable in React’s perspective, it isn’t really reusable yet, because every Button component implements the same behavio</p>
+</Notes>
+
+---
+
+<CodeSurfer
+  code={require("!raw-loader!./examples/reusable-components/03.js").default}
+  steps={[
+    { notes: '' },
+    { range: [11, 18] },
+    { lines: [13, 16, 1, 3] }
+  ]}
+/>
+
+<Notes>
+  <p></p>
+  <p></p>
+  <p></p>
+  <p></p>
+</Notes>
+
+---
+
+<CodeSurfer
+  code={require("!raw-loader!./examples/reusable-components/04.js").default}
+  steps={[
+    { notes: '' },
+    { lines: [5,9,16,19] }
+  ]}
+/>
+
+<Notes>
+  <p>From there you can refactor it step by step by moving more properties outside of the specific Button component to make it more generic by using its API.</p>
+  <p>Another property could be the label showing up for the button:</p>
+</Notes>
+
+---
+
+<CodeSurfer
+  code={require("!raw-loader!./examples/reusable-components/05.js").default}
+  steps={[
+    { notes: '' },
+    { lines: [14,17], range: [4,9] }
+  ]}
+/>
+
+<Notes>
+  <p>We can also use React’s built-in children property which is commonly used for composition in React
+  </p>
+</Notes>
+
+---
+
+<CodeSurfer
+  code={require("!raw-loader!./examples/reusable-components/06.js").default}
+  steps={[
+    { notes: '' },
+    { lines: [8, 17, 19] }
+  ]}
+/>
+
+<Notes>
+  <p>The type attribute of our button is wired in the Button component and we cannot do anything about it from the outside</p>
+  <p>We can implement a default prop for our Button component for the type property.</p>
+  <p>You have seen how to refactor a React component from being specific to being more generic. Generic React components are commonly widely used in the entire application because they are highly reusable.</p>
+  END 🛑 Reusable Component
+</Notes>
+
+---
+
+# Padrões Avançados
+<ul>
+  <Appear>
+    <li>Compound Pattern</li>
+    <li>Provider Pattern</li>
+    <li>HOC</li>
+    <li>Render Prop</li>
+  </Appear>
+</ul>
+
+<Notes>
+  <p>Citar resumidamente os 4 padrões avançados</p>
+</Notes>
+
+---
+
+<CodeSurfer
+  title="Compund Pattern"
+  code={require("!raw-loader!./examples/compound/01.js").default}
+  steps={[
+    { notes: '' },
+    { range: [2,25] },
+    { lines: [32], notes: 'Lista com todas mensagens enviadas' },
+    { lines: [33], notes: 'Permite escrecer uma nova mensagem' },
+    { lines: [34], notes: 'Envia a mensagem' }
+  ]}
+/>
+
+<Notes>
+  <p>going to be building a simple chat application that manages a few different pieces of state such as the current message value and the entire list of messages sent.</p>
+  <p>The goal is to have all of these pieces working together fluidly behind the scenes, while still providing flexibilty for the user of the component.</p>
+  <a href="https://codesandbox.io/s/ykxo1n7nwx">https://codesandbox.io/s/ykxo1n7nwx</a>
+</Notes>
+
+---
+
+# É suficiente ?
+<ul>
+  <Appear>
+    <li>static properties</li>
+    <li>React.Children.Map</li>
+    <li>React.cloneElement</li>
+  </Appear>
+</ul>
+
+<Notes>
+  <p>There’s no flexibility!</p>
+  <p>What if you wanted to change the rendering order of Chat, maybe by moving the messages below the input? What if you wanted to invert design control of each message over to the user? </p>
+</Notes>
+
+---
+
+<CodeSurfer
+  code={require("!raw-loader!./examples/compound/02.js").default}
+/>
+
+<Notes>
+  <p>the first step towards a more flexible Chat component by adding three static properties called Messages, Input and Button, with their values equal to the corresponding components</p>
+  <p>to refer to these static properties as “sub-components”</p>
+</Notes>
+
+---
+
+<CodeSurfer
+  code={require("!raw-loader!./examples/compound/03.js").default}
+/>
+
+<Notes>
+  <p>The layout is still hardcoded, going against our flexible philosophy. What we desire is to have the user of the component determine how things render</p>
+  <p>to refer to these static properties as “sub-components”</p>
+</Notes>
+
+---
+
+<CodeSurfer
+  code={require("!raw-loader!./examples/compound/04.js").default}
+/>
+
+<Notes>
+  <p>We’re no longer hardcoding the layout, so users of Chat can explicitly declare it in their own code using the dot-notation syntax</p>
+  <p> Let’s simulate this by updating the App component</p>
+</Notes>
+
+---
+
+<CodeSurfer
+  code={require("!raw-loader!./examples/compound/05.js").default}
+/>
+
+<Notes>
+  <p>Things are slowly starting to take shape, but now the app is broken. All that’s rendering is Chatroom</p>
+  <p>At first glance, you might think the solution would be to render this.props.children underneath it</p>
+  <p>The error stems from the fact that Chat.Messages is not getting a messages prop the way it did when we were hardcoding the layout in the render method</p>
+  <p>We can’t put the onus on the user to pass those props around. They don’t even have access to them. They’re tucked away in a black box. So now the question becomes, how do we keep this flexible component syntax while also passing data?</p>
+</Notes>
+
+---
+
+<CodeSurfer
+  code={require("!raw-loader!./examples/compound/06.js").default}
+/>
+
+<Notes>
+  <p>React.Children is a top-level API that “provides utilities” for dealing with this.props.children</p>
+  <p>One of those utilities is React.Children.map</p>
+  <p>After you save, you’ll notice that the error is still there. That’s because we’re still not passing any props to the children. Luckily, React gives us another utility to make this happen.</p>
+</Notes>
+
+---
+
+<CodeSurfer
+  code={require("!raw-loader!./examples/compound/07.js").default}
+/>
+
+<Notes>
+  <p>the way that my team and I identify specific children as it has worked well for us. We use a property on components called displayName</p>
+  <p>You can explicitly add a displayName to any class or function component. It’s the same as adding propTypes or defaultProps</p>
+  <p>This value is now accessible on each child inside of the React.Children.map via child.type.displayName:.</p>
+</Notes>
+
+---
+
+<CodeSurfer
+  code={require("!raw-loader!./examples/compound/08.js").default}
+  steps={[
+    { notes: '' },
+    { range: [13, 32]}
+  ]}
+/>
+
+<Notes>
+  <p>identifying specific children of the Chat component using their set displayName, cloning them, and passing each custom props.</p>
+  <p>The lingering error message should now be gone and everything should be working properly! You just wrote your first compound component, albeit a pretty basic one</p>
+</Notes>
+
+---
+
+# Drawbacks
+
+<Notes>
+  <p>What would happen if you wanted to wrap any of the sub-components in another component, or even a simple div</p>
+  <p>because Chat.Button is no longer a direct child of Chat. That seat is now held by the innocent looking div element. This is where the limitations of React.Children.map begin to show. If you really want to craft a flexible compound component, you’ll have to take things a step further (more below).</p>
+  END 🛑 Compound Pattern
+</Notes>
+
+---
+
+<CodeSurfer
+  title="Provider Pattern"
+  code={require("!raw-loader!./examples/provider/01.js").default}
+  steps={[
+    { notes: 'O que tentaremos resolver ?' },
+    { notes: 'Children devem ser acessadas em qq local da árvore' },
+    { notes: 'Child deve informar explicitamente o state que precisa' },
+    { notes: 'Não deve ser necessário o clone para enviar os dados para children' },
+  ]}
+/>
+
+<Notes>
+  <p>In my opinion, the biggest drawback surrounds React.Children.map. Not only does it bloat the render method, but it also has the limitation of only giving you access to the direct children of the component you’re rendering.</p>
+  <a href="https://codesandbox.io/s/zz95n04wx4">https://codesandbox.io/s/zz95n04wx4</a>
+</Notes>
+
+---
+
+# COMO ?
+<Appear>
+<h2>REACT CONTEXT</h2>
+</Appear>
+
+---
+
+<CodeSurfer
+  title="Criando Context"
+  code={require("!raw-loader!./examples/provider/03.js").default}
+/>
+
+<Notes>
+  <p>The createContext method returns an object containing a Provider and Consumer pair. The former exposes data to the latter.</p>
+  <p></p>
+</Notes>
+
+---
+
+<CodeSurfer
+  title="Criando Context"
+  code={require("!raw-loader!./examples/provider/04.js").default}
+/>
+
+<Notes>
+  <p>The Chat component will need to be refactored so that it renders the Provider</p>
+  <p>This means that the unsightly React.Children.map method can finally take hike</p>
+</Notes>
+
+---
+
+<CodeSurfer
+  title="Provendo Context"
+  code={require("!raw-loader!./examples/provider/05.js").default}
+/>
+
+<Notes>
+  <p>The ChatContext.Provider requires a single prop named value.</p>
+  <p>This prop can be thought of simply as the actual context being provided, and any underlying Consumers will have access to it.</p>
+  <p>Messages requires a messages prop Input requires a value prop and an onChange prop Button requires an onClick prop</p>
+  <p>The values of these props all exist somewhere in the Chat component, either in this.state or as class methods. We can combine them into a single object and assign it to the value prop for ChatContext.Provider</p>
+  <p>The first way is to simply create a new object, we’ll call it context, at the top of the render method with all the necessary data inside of it. Then we can pass that object to ChatContext.Provider</p>
+  <p>Although this works, there is a significant downside. The context object must be re-created every time the Chat component renders, even if none of the values inside of the object have changed. This will inevitably cause some unnecessary re-rendering of the components below.</p>
+</Notes>
+
+---
+
+<CodeSurfer
+  title="Provendo Context"
+  code={require("!raw-loader!./examples/provider/06.js").default}
+/>
+
+<Notes>
+  <p>The second and more performant way to handle this would be to add the methods to the state object of Chat, and pass the state directly to ChatContext.Provider</p>
+</Notes>
+
+---
+
+<CodeSurfer
+  title="Consumindo Context"
+  code={require("!raw-loader!./examples/provider/07.js").default}
+/>
+
+<Notes>
+  <p></p>
+</Notes>
+
+---
+
+<CodeSurfer
+  title="Consumindo Context"
+  code={require("!raw-loader!./examples/provider/08.js").default}
+/>
+
+<Notes>
+  <p>In each sub-component you can now import ChatConsumer and render it as the root element of each.</p>
+  <p>Before this refactor, the sub-components of Chat relied on props passed in during the React.cloneElement process. Now, instead of mapping through each child and cloning them, they can each explicitly declare what data they need from the Provider above.</p>
+  END 🛑 Provider Pattern
+</Notes>
+
+---
+
+# Render Prop Pattern
+
+<Notes>
+  <p>The concept of children as a function or child as a function, also called render prop in general, is one of the advanced patterns in React</p>
+  <p>The components which implement this pattern could be called render prop components.</p>
+</Notes>
+
+---
+
+<CodeSurfer
+  title="Render Prop"
+  code={require("!raw-loader!./examples/render-prop/01.js").default}
+/>
+
+<Notes>
+  <p>Let’s get started with the implementation of the currency converter in order to learn about React’s render prop pattern.</p>
+</Notes>
+
+---
+
+<CodeSurfer
+  title="Render Prop"
+  code={require("!raw-loader!./examples/render-prop/02.js").default}
+  steps={[
+    { notes: '' },
+    { range: [7, 9] },
+    { range: [12, 14] },
+    { range: [16, 18] },
+    { range: [20, 32] }
+  ]}
+/>
+
+<Notes>
+  <p>let’s implement a new React component next to the App component where you can increment (and decrement) a number</p>
+  <p>In this case, the abstract number will be the amount of US Dollar which should be converted to other currencies later on</p>
+</Notes>
+
+---
+
+<CodeSurfer
+  title="Render Prop"
+  code={require("!raw-loader!./examples/render-prop/03.js").default}
+/>
+
+<Notes>
+  <p>Now let’s tap into the problem space where render props or alternatives can be applied for this scenario</p>
+  <p>What if you want to use the amount, which is set to the state of the Amount component, in dedicated currency components which apply the exchange rate</p>
+</Notes>
+
+---
+
+<CodeSurfer
+  title="Render Prop"
+  code={require("!raw-loader!./examples/render-prop/04.js").default}
+/>
+
+<Notes>
+  <p>The naive approach would be to render the currency components within the Amount component</p>
+  <p>It’s totally valid doing it this way. The major advantage here is the simplicity of it. If there is no strong use case of having more control about what is rendered within the Amount component, you can go for it. </p>
+  <p>However, the disadvantage is that the Amount component has to know about the currency components now.</p>
+  <p>So what if you could just leave the Amount component as it was before and get the currency components outside of it?</p>
+</Notes>
+
+---
+
+<CodeSurfer
+  title="Lift State"
+  code={require("!raw-loader!./examples/render-prop/05.js").default}
+  steps={[
+    { notes: '' },
+    { range: [1, 17] },
+    { range: [22, 25] },
+    { range: [27, 28] },
+    { lines: [34, 36, 38, 41] }
+  ]}
+/>
+
+<Notes>
+  <p> because the currency components don’t know about the amount now. You would have to lift the state from the Amount component to the App component</p>
+  <p>All state is managed by the App component and the currency components and the Amount component only receive props.</p>
+  <p>he implementation for managing the state was kept the same, it was only lifted up to the App component. So this approach would be a valid solution to the problem.</p>
+  <p>But wait, what about component composition in React with its children prop? This should work too, shouldn’t it? </p>
+</Notes>
+
+---
+
+<CodeSurfer
+  code={require("!raw-loader!./examples/render-prop/06.js").default}
+  steps={[
+    { notes: '' },
+    { lines: [30] }
+  ]}
+/>
+
+<Notes>
+  <p>Let’s revert the components to their old implementation and see how this would look like.</p>
+  <p>The Amount component would get control over the amount state again. In addition to the previous version, it would render the children prop for the composition too</p>
+</Notes>
+
+---
+
+<CodeSurfer
+  code={require("!raw-loader!./examples/render-prop/07.js").default}
+/>
+
+<Notes>
+  <p>Now the App component could pass the currency components as children prop to the Amount component</p>
+  <p>However, again you would have to lift state up to the App component in order to pass the amount to the currency components. </p>
+  <p>As you can see, the component composition on its own doesn’t help us to solve the problem. That’s the point where React’s render props pattern comes into play which enhances React’s component composition with an important ingredient: a render function.</p>
+</Notes>
+
+---
+
+<CodeSurfer
+  code={require("!raw-loader!./examples/render-prop/08.js").default}
+  steps={[
+    { notes: '' },
+    { lines: [3, 8] }
+  ]}
+/>
+
+<Notes>
+  <p>The render prop pattern enhances React’s patterns for compositions</p>
+  <p>Instead of passing the currency components as components, you pass them as a function which renders them</p>
+</Notes>
+
+---
+
+<CodeSurfer
+  code={require("!raw-loader!./examples/render-prop/09.js").default}
+  steps={[
+    { notes: '' },
+    { lines: [30] }
+  ]}
+/>
+
+<Notes>
+  <p>It gives you a way to pass data from the wrapping component (Amount) to its inner composed component(s) (currency components)</p>
+  <p>Instead of passing the currency components as components, you pass them as a function which renders them</p>
+  <p>The children prop becomes a children as a function.</p>
+</Notes>
+
+---
+
+<CodeSurfer
+  code={require("!raw-loader!./examples/render-prop/10.js").default}
+  steps={[
+    { notes: '' },
+    { lines: [3,5,6] },
+    { lines: [41] },
+  ]}
+/>
+
+<Notes>
+  <p>Rather than using the children directly to render them, you have to call it as function now, because the children are passed as function to the Amount component in the first place</p>
+  <p>However, since you are using children as a function now, you can pass the amount state to the function and access it as argument in the function signature outside of the Amount component</p>
+  <p>That’s the crucial point for the render prop pattern. In this case, the Amount component became a render prop component, because it implements the render prop pattern, and uses a children as a function or also called child as a function to pass its own state (or other data) to the composed components (here currency components)</p>
+</Notes>
+
+---
+
+<CodeSurfer
+  code={require("!raw-loader!./examples/render-prop/11.js").default}
+  steps={[
+    { notes: '' },
+    { lines: [5] }
+  ]}
+/>
+
+<Notes>
+  <p>The currency components are still decoupled from the Amount component and you can even add other components and elements into the composition</p>
+  END 🛑  Render Prop Pattern
+</Notes>
+
+---
+
+# High Order Components (HOC) 🎸
+
+---
+
+<CodeSurfer
+  code={require("!raw-loader!./examples/hoc/01.js").default}
+/>
+
+<Notes>
+  <p>Let’s say that we want to extract the logging logic out of these functions without changing their signatures. How can we do this? An elegant solution is to write a higher-order function, that is, a function that takes a function as an argument and returns a function.</p>
+  <p>These two functions are not very useful but they help us demonstrate a pattern that we can later apply to components.</p>
+</Notes>
+
+---
+
+<CodeSurfer
+  code={require("!raw-loader!./examples/hoc/02.js").default}
+/>
+
+<Notes>
+  <p>Again, it sounds more intimidating than it really is</p>
+</Notes>
+
+---
+
+<CodeSurfer
+  code={require("!raw-loader!./examples/hoc/03.js").default}
+  steps={[
+    { notes: '' },
+    { lines: [18, 21, 23, 24] }
+  ]}
+/>
+
+<Notes>
+  <p>Again, it sounds more intimidating than it really is</p>
+</Notes>
+
+---
+
+<CodeSurfer
+  code={require("!raw-loader!./examples/hoc/04.js").default}
+  steps={[
+    { notes: '' },
+    { lines: [1, 31,32,33] }
+  ]}
+/>
+
+<Notes>
+  <p>he following code demonstrates that the problem could be solved with a higher-order component (HOC) as well</p>
+</Notes>
+
+---
+
+<CodeSurfer
+  code={require("!raw-loader!./examples/hoc/05.js").default}
+  steps={[
+    { notes: '' },
+    { lines: [5, 7] }
+  ]}
+/>
+
+<Notes>
+  <p>Then it could be used by passing an array of currency components to the HOC:</p>
+  <p>And finally using it in your App component:</p>
+  <p>in this case you would lose the possibility to render something in between. You are strictly coupled to the higher-order component’s render method</p>
+  <p>If you need to add something in between of the currency components, you would have to do it in the higher-order component.</p>
+  END 🛑  HOC Pattern
+</Notes>
+
+---
+
+# React State sem Constructor
+
+---
+
+<CodeSurfer
+  code={require("!raw-loader!./examples/state-without-constructor/01.js").default}
+  steps={[
+    { notes: '' },
+    { range: [5, 31] },
+    { range: [33, 37] },
+    { range: [39, 47] }
+  ]}
+/>
+
+---
+
+<CodeSurfer
+  code={require("!raw-loader!./examples/state-without-constructor/02.js").default}
+  steps={[
+    { notes: '' },
+    { range: [4,6] }
+  ]}
+/>
+
+<Notes>
+  <p>How to set initial state in React without a constructor? In this case, there is an initial state for the toggle property in the App component.</p>
+
+</Notes>
+
+---
+
+# React State sem Class
+
+- Definir  initialState sem constructor
+- Acessar state sem um constructor
+- Acessar setState sem um constructor
+
+---
+
+<CodeSurfer
+  code={require("!raw-loader!./examples/state-without-constructor/03.js").default}
+  steps={[
+    { notes: '' },
+    { range: [1,2], lines: [6, 18] }
+  ]}
+/>
+
+<Notes>
+  <p>w, the component has no access to the this object and therefore no access to this.state or this.setState. Next, use the withState higher-order component from recompose to enhance the App component.</p>
+</Notes>
+
+---
+
+<CodeSurfer
+  code={require("!raw-loader!./examples/state-without-constructor/04.js").default}
+  steps={[
+    { notes: '' },
+    { lines: [1, 13, 15] }
+  ]}
+/>
+
+<Notes>
+  <p>It may be simpler to read it this way:</p>
+  <p>The returned function from the withState function call is used for the component which needs to be enhanced.</p>
+</Notes>
+
+---
+
+<CodeSurfer
+  code={require("!raw-loader!./examples/state-without-constructor/05.js").default}
+  steps={[
+    { notes: '' },
+    { lines: [1, 5, 11] }
+  ]}
+/>
+
+<Notes>
+  <p>These are used for the configuration of 1) the state property name, 2) the name of the state update function, and 3) the initial state.</p>
+</Notes>
+
+---
+
+<CodeSurfer
+  code={require("!raw-loader!./examples/state-without-constructor/06.js").default}
+  steps={[
+    { notes: '' },
+    { lines: [2, 4, 10, 16, 17] }
+  ]}
+/>
+
+<Notes>
+  <p>Now use multiple withState higher-order components, whereas the list state has no update function yet, by using recompose’s compose function:</p>
+</Notes>
+
+---
+
+<CodeSurfer
+  code={require("!raw-loader!./examples/state-without-constructor/07.js").default}
+  steps={[
+    { notes: '' },
+  ]}
+/>
+
+<Notes>
+  <p> How can React render props be used to make a functional component stateful? </p>
+  <p>Since there is no recompose for render prop components, you have to implement a render prop for it yourself</p>
+  <p>A render prop component would have to be used in the App component to manage the state on behalf of the App component.</p>
+</Notes>
+
+---
+
+<CodeSurfer
+  code={require("!raw-loader!./examples/state-without-constructor/08.js").default}
+  steps={[
+    { notes: '' },
+    { lines: [2,3,6,7,9,11,12]}
+  ]}
+/>
+
+<Notes>
+  <p>So let’s say the App component becomes a functional component again and uses a so called State render prop component</p>
+  <p>Many things have changed. In this case, the render prop uses a function as a child.</p>
+  <p>This function gives access to the state (1. argument) and an update function (2. argument).</p>
+</Notes>
+
+---
+
+<CodeSurfer
+  code={require("!raw-loader!./examples/state-without-constructor/09.js").default}
+  steps={[
+    { notes: '' },
+  ]}
+/>
+
+<Notes>
+  <p>The State render prop component manages a generic state called value.</p>
+  <p>The state itself and the state update function (class method) are passed to the children as a function as arguments</p>
+  <p>This function gives access to the state (1. argument) and an update function (2. argument).</p>
+</Notes>
+
+---
+
+<CodeSurfer
+  code={require("!raw-loader!./examples/state-without-constructor/10.js").default}
+  steps={[
+    { notes: '' },
+    { lines: [6, 20] }
+  ]}
+/>
+
+<Notes>
+  <p></p>
+  END 🛑  React State With Constructor
+</Notes>
+
+---
+
+# The end
